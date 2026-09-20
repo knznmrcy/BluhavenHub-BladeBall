@@ -1,26 +1,34 @@
 task.spawn(function()
-    local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/discoart/FluentPlus/refs/heads/main/Beta.lua"))()
-    local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-    local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
-    local Window = Fluent:CreateWindow({
+    -- ============================================================
+    -- ========== WINDUI ==========
+    -- ============================================================
+    local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+    WindUI:SetTheme("Dark")
+
+    local Window = WindUI:CreateWindow({
         Title = "BluehavenHub Best X",
-        SubTitle = "Paid Version",
-        TabWidth = 100,
-        Size = UDim2.fromOffset(440, 315),
-        Acrylic = false,
-        Theme = "Darker",
-        MinimizeKey = Enum.KeyCode.LeftControl
+        Icon = "rbxassetid://89282378235317",
+        Author = "Paid Version",
+        Folder = "BluehavenHub",
+        Size = UDim2.fromOffset(580, 460),
+        Transparent = true,
+        Theme = "Dark",
+        SideBarWidth = 160,
+        HasOutline = true,
+        KeySystem = false,
     })
+
     local Tabs = {
-        Rage = Window:AddTab({Title = "Autoparry", Icon = "sword"}),
-        Spam = Window:AddTab({Title = "Spam", Icon = "skull"}),
-        Detection = Window:AddTab({Title = "Detection", Icon = "eye"}),
-        Visuals = Window:AddTab({Title = "Visuals", Icon = "monitor"}),
-        Misc = Window:AddTab({Title = "Misc", Icon = "settings"}),
-        Settings = Window:AddTab({Title = "Settings", Icon = "sliders"})
+        Rage = Window:Tab({ Title = "Autoparry", Icon = "sword" }),
+        Spam = Window:Tab({ Title = "Spam", Icon = "skull" }),
+        Detection = Window:Tab({ Title = "Detection", Icon = "eye" }),
+        Visuals = Window:Tab({ Title = "Visuals", Icon = "monitor" }),
+        Misc = Window:Tab({ Title = "Misc", Icon = "settings" }),
+        Settings = Window:Tab({ Title = "Settings", Icon = "sliders" })
     }
-    local Options = Fluent.Options
+
     repeat task.wait(0.5) until game:IsLoaded()
+
     local Players = cloneref(game:GetService('Players'))
     local ReplicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
     local UserInputService = cloneref(game:GetService('UserInputService'))
@@ -36,6 +44,7 @@ task.spawn(function()
     if not LocalPlayer.Character then LocalPlayer.CharacterAdded:Wait() end
     local Alive = Workspace:FindFirstChild("Alive") or Workspace:WaitForChild("Alive")
     local Runtime = Workspace.Runtime
+
     local function detectMobile()
         local touch = UserInputService.TouchEnabled
         local mouse = UserInputService.MouseEnabled
@@ -44,6 +53,7 @@ task.spawn(function()
         if touch and not mouse then return true end
         return false
     end
+
     local System = {
         __properties = {
             __autoparry_enabled = false, __triggerbot_enabled = false, __manual_spam_enabled = false, __auto_spam_enabled = false, __play_animation = false, __accuracy = 50, __divisor_multiplier = 1.1, __parried = false, __training_parried = false, __spam_threshold = 1.5, __parries = 0, __parry_key = nil, __grab_animation = nil, __tornado_time = tick(), __first_parry_done = false, __connections = {}, __reverted_remotes = {}, __spam_accumulator = 0, __spam_rate = 240, __infinity_active = false, __deathslash_active = false, __timehole_active = false, __slashesoffury_active = false, __slashesoffury_count = 0, __is_mobile = detectMobile(), __mobile_guis = {}, __randomized_accuracy_enabled = false, __speed_display_enabled = false, __auto_jump_enabled = false, __ball_speed = 0, __peak_ball_speed = 0, __headless_enabled = false, __korblox_enabled = false, __thunder_dash_enabled = false, __ball_velocity_gui = nil, __ball_velocity_enabled = false, __peak_velocity = 0, __last_ball_id = nil, __ping_label = nil
@@ -54,12 +64,15 @@ task.spawn(function()
         },
         __triggerbot = { __enabled=false,__is_parrying=false, __parries=0,__max_parries=10000,__parry_delay=0.01 }
     }
+
     local CURVE_NAMES = {"Camera","Random","Accelerated","Backwards","Slow","High","Normal","Speed","Down","Left","Right"}
     local Selected_Parry_Type = "Camera"
     local CurveType = "Camera"
+
     local function update_divisor()
         System.__properties.__divisor_multiplier = 0.7 + (System.__properties.__accuracy - 1) * (0.9/99)
     end
+
     local function update_randomized_accuracy()
         if not System.__properties.__randomized_accuracy_enabled then return end
         local ping_str = Stats.Network.ServerStatsItem["Data Ping"]:GetValueString()
@@ -70,16 +83,19 @@ task.spawn(function()
         else new_accuracy = System.__properties.__accuracy end
         if new_accuracy then System.__properties.__accuracy = new_accuracy; update_divisor() end
     end
+
     task.spawn(function()
         while task.wait(1) do
             if System.__properties.__randomized_accuracy_enabled then update_randomized_accuracy() end
         end
     end)
+
     -- ============================================================
     -- ========== REMOTE FINDER ==========
     -- ============================================================
     local replicated_storage = cloneref(game:GetService('ReplicatedStorage'))
     local workspace = cloneref(game:GetService('Workspace'))
+
     local _token
     local _tokenFound = false
     for _, Function in getgc(true) do
@@ -93,10 +109,12 @@ task.spawn(function()
         end
         if _token then break end
     end
+
     if not _tokenFound then
-        Fluent:Notify({Title="BluehavenHub X", Content="Token tapılmadı!", Duration=5})
+        Window:Notification({ Title = "BluehavenHub X", Content = "Token tapılmadı!", Duration = 5 })
         return
     end
+
     function _tokenize(_remote_uid)
         local time = tostring(math.floor(workspace:GetServerTimeNow() * 100))
         local key = _token(_remote_uid, 'TIME')
@@ -106,14 +124,17 @@ task.spawn(function()
         end
         return table.concat(characters)
     end
+
     local _reverted = {}
     local _original = {}
     local _capturedRemote = nil
     local _capturedArgs = nil
+
     function _is_valid(args)
         if not args or #args < 8 then return false end
         return true
     end
+
     function _hook(remote)
         if not remote then return end
         if _reverted[remote] then return end
@@ -140,10 +161,13 @@ task.spawn(function()
         end
         setreadonly(_meta, true)
     end
+
     for _iterator, _remote in pairs(replicated_storage:GetDescendants()) do
         if _remote:IsA('RemoteEvent') or _remote:IsA('RemoteFunction') then _hook(_remote) end
     end
+
     task.wait(5)
+
     task.spawn(function()
         local attempts = 0
         while not _capturedRemote and attempts < 30 do
@@ -151,11 +175,12 @@ task.spawn(function()
             attempts = attempts + 1
         end
         if _capturedRemote then
-            Fluent:Notify({Title="BluehavenHub X", Content="Remote tapıldı ✓", Duration=3})
+            Window:Notification({ Title = "BluehavenHub X", Content = "Remote tapıldı ✓", Duration = 3 })
         else
-            Fluent:Notify({Title="BluehavenHub X", Content="Remote tapılmadı!", Duration=5})
+            Window:Notification({ Title = "BluehavenHub X", Content = "Remote tapılmadı!", Duration = 5 })
         end
     end)
+
     local function fireParryRemote(curveCF)
         if not _capturedRemote or not _capturedArgs then return false end
         local cam = Workspace.CurrentCamera
@@ -201,6 +226,7 @@ task.spawn(function()
         end)
         return true
     end
+
     -- ============================================================
     -- ========== ANIMATION SYSTEM ==========
     System.animation = {}
@@ -210,6 +236,7 @@ task.spawn(function()
     local Sword_Spped = 1
     local Grab_Parry = nil
     local AnimFix_Cache = {}
+
     local function GetParryAnimation(swordName)
         if not swordName or swordName == "" then return SwordAPI.Collection.Default:FindFirstChild("GrabParry") end
         if AnimFix_Cache[swordName] then return AnimFix_Cache[swordName] end
@@ -230,16 +257,19 @@ task.spawn(function()
         AnimFix_Cache[swordName] = SwordAPI.Collection.Default:FindFirstChild("GrabParry")
         return AnimFix_Cache[swordName]
     end
+
     local function GrabParryPlay(track)
         if not track then return end
         pcall(function()
             track:Play( track:GetAttribute("PlayFadeTime") or 0, track:GetAttribute("PlayWeight") or 1, track:GetAttribute("PlaySpeed") or 1 )
         end)
     end
+
     local function GrabParryStop(track)
         if not track then return end
         pcall(function() track:Stop(track:GetAttribute("StopFadeTime") or 0.1) end)
     end
+
     function System.animation.play_grab_parry()
         if not System.__properties.__play_animation then return end
         if not ((os.clock() - LastPlayedd) >= (Sword_Spped - 0.8) or Sword_CP) then return end
@@ -268,6 +298,7 @@ task.spawn(function()
         Grab_Parry = humanoid.Animator:LoadAnimation(animation)
         GrabParryPlay(Grab_Parry)
     end
+
     pcall(function()
         ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent:Connect(function()
             Sword_CP = true
@@ -282,6 +313,7 @@ task.spawn(function()
             end
         end)
     end)
+
     -- ========== BALL SYSTEM ==========
     System.ball = {}
     function System.ball.get()
@@ -290,6 +322,7 @@ task.spawn(function()
             if ball:GetAttribute('realBall') then ball.CanCollide=false; return ball end
         end; return nil
     end
+
     function System.ball.get_all()
         local balls_table={}; local balls=Workspace:FindFirstChild('Balls')
         if not balls then return balls_table end
@@ -297,6 +330,7 @@ task.spawn(function()
             if ball:GetAttribute('realBall') then ball.CanCollide=false; table.insert(balls_table,ball) end
         end; return balls_table
     end
+
     System.player = {}
     local Closest_Entity=nil; local last_closest_check=0
     function System.player.get_closest()
@@ -313,6 +347,7 @@ task.spawn(function()
         end
         Closest_Entity=closest_entity; return closest_entity
     end
+
     System.curve = {}
     function System.curve.get_cframe()
         local Camera = Workspace.CurrentCamera
@@ -381,6 +416,7 @@ task.spawn(function()
         end
         return cf
     end
+
     System.parry = {}
     function System.parry.execute()
         if System.__properties.__parries > 10000 or not LocalPlayer.Character then return end
@@ -391,6 +427,7 @@ task.spawn(function()
             if System.__properties.__parries > 0 then System.__properties.__parries=System.__properties.__parries-1 end
         end)
     end
+
     function System.parry.keypress()
         if System.__properties.__parries > 10000 or not LocalPlayer.Character then return end
         fireParryRemote(System.curve.get_cframe())
@@ -400,11 +437,14 @@ task.spawn(function()
             if System.__properties.__parries > 0 then System.__properties.__parries=System.__properties.__parries-1 end
         end)
     end
+
     function System.parry.execute_action()
         System.animation.play_grab_parry(); System.parry.execute()
     end
+
     local function linear_predict(a,b,t) return a+(b-a)*t end
     System.detection = { __ball_properties = {__aerodynamic_time=tick(),__last_warping=tick(),__lerp_radians=0,__curving=tick()} }
+
     function System.detection.is_curved()
         local props=System.detection.__ball_properties
         local ball=System.ball.get(); if not ball then return false end
@@ -428,14 +468,18 @@ task.spawn(function()
         if (tick()-props.__curving) < (reach_time/1.1) then return true end
         return dot < dot_threshold
     end
+
     ReplicatedStorage.Remotes.DeathBall.OnClientEvent:Connect(function(c,d) System.__properties.__deathslash_active = d or false end)
     ReplicatedStorage.Remotes.InfinityBall.OnClientEvent:Connect(function(a,b) System.__properties.__infinity_active = b or false end)
+
     ReplicatedStorage.Packages._Index["sleitnick_net@0.1.0"].net["RE/TimeHoleActivate"].OnClientEvent:Connect(function(...)
         local args={...}; local player=args[1]
         if player==LocalPlayer or player==LocalPlayer.Name or (player and player.Name==LocalPlayer.Name) then System.__properties.__timehole_active=true end
     end)
     ReplicatedStorage.Packages._Index["sleitnick_net@0.1.0"].net["RE/TimeHoleDeactivate"].OnClientEvent:Connect(function() System.__properties.__timehole_active=false end)
+
     local maxParryCount=36; local parryDelay=0.05
+
     ReplicatedStorage.Packages._Index["sleitnick_net@0.1.0"].net["RE/SlashesOfFuryActivate"].OnClientEvent:Connect(function(...)
         local args={...}; local player=args[1]
         if player==LocalPlayer or player==LocalPlayer.Name or (player and player.Name==LocalPlayer.Name) then
@@ -455,6 +499,7 @@ task.spawn(function()
             end
         end)
     end)
+
     Runtime.ChildAdded:Connect(function(Object)
         if System.__config.__detections.__phantom then
             if Object.Name=="maxTransmission" or Object.Name=="transmissionpart" then
@@ -482,6 +527,7 @@ task.spawn(function()
             end
         end
     end)
+
     ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent:Connect(function(_,root)
         if root.Parent and root.Parent ~= LocalPlayer.Character then
             if not Alive or root.Parent.Parent ~= Alive then return end
@@ -498,10 +544,12 @@ task.spawn(function()
         end
         if System.__properties.__grab_animation then System.__properties.__grab_animation:Stop() end
     end)
+
     ReplicatedStorage.Remotes.ParrySuccess.OnClientEvent:Connect(function()
         if not Alive or LocalPlayer.Character.Parent ~= Alive then return end
         if System.__properties.__grab_animation then System.__properties.__grab_animation:Stop() end
     end)
+
     ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent:Connect(function(a,b)
         local Primary_Part=LocalPlayer.Character.PrimaryPart
         local Ball=System.ball.get(); if not Ball then return end
@@ -519,6 +567,7 @@ task.spawn(function()
         if Enough_Speed and Reach_Time > Pings/10 then Ball_Distance_Threshold=math.max(Ball_Distance_Threshold-15,15) end
         if b ~= Primary_Part and Distance > Ball_Distance_Threshold then System.detection.__ball_properties.__curving=tick() end
     end)
+
     -- ========== THUNDER DASH ==========
     local ThunderDash = {}
     function ThunderDash:Enable()
@@ -536,6 +585,7 @@ task.spawn(function()
         Abilities.ChildAdded:Connect(removeCooldowns)
     end
     function ThunderDash:Disable() System.__properties.__thunder_dash_enabled = false end
+
     -- ========== TRIGGERBOT ==========
     System.triggerbot = {}
     local triggerbotCooldown = false
@@ -559,6 +609,7 @@ task.spawn(function()
             System.__triggerbot.__is_parrying=false
         end)
     end
+
     function System.triggerbot.loop()
         if not System.__triggerbot.__enabled then return end
         if LocalPlayer.Character and LocalPlayer.Character.PrimaryPart and LocalPlayer.Character.PrimaryPart:FindFirstChild('SingularityCape') then return end
@@ -570,6 +621,7 @@ task.spawn(function()
             end
         end
     end
+
     function System.triggerbot.enable(enabled)
         System.__triggerbot.__enabled=enabled
         if enabled then
@@ -586,10 +638,12 @@ task.spawn(function()
             triggerbotCooldown = false
         end
     end
+
     System.manual_spam = {}
     local manualSpamThread=nil
     local macroSpamActive=false
     local macroFrameFireCount=0; local macroFrameTime=0; local macroRealCPS=0; local macroAnimFix=true
+
     function System.manual_spam.start()
         System.manual_spam.stop()
         System.__properties.__manual_spam_enabled=true; macroSpamActive=true
@@ -616,9 +670,11 @@ task.spawn(function()
             end
         end)
     end
+
     function System.manual_spam.stop()
         System.__properties.__manual_spam_enabled=false; macroSpamActive=false; manualSpamThread=nil
     end
+
     RunService.Heartbeat:Connect(function(dt)
         macroFrameTime=macroFrameTime+dt
         if macroFrameTime >= 0.1 then
@@ -630,6 +686,7 @@ task.spawn(function()
             if macroAnimFix then System.animation.play_grab_parry() end
         end
     end)
+
     -- ========== AUTO PARRY ==========
     System.autoparry = {}
     function System.autoparry.start()
@@ -732,12 +789,14 @@ task.spawn(function()
             end
         end)
     end
+
     function System.autoparry.stop()
         if System.__properties.__connections.__autoparry then
             System.__properties.__connections.__autoparry:Disconnect()
             System.__properties.__connections.__autoparry=nil
         end
     end
+
     -- ========== HEADLESS & KORBLOX ==========
     local Byte_Library = {}
     function Byte_Library.Korblox(char)
@@ -794,16 +853,19 @@ task.spawn(function()
             end
         end
     end
+
     local function ApplyHeadlessKorblox()
         local char = LocalPlayer.Character
         if not char then return end
         if System.__properties.__headless_enabled then Byte_Library.Headless(char) end
         if System.__properties.__korblox_enabled then Byte_Library.Korblox(char) end
     end
+
     LocalPlayer.CharacterAdded:Connect(function(char)
         task.wait(0.5)
         ApplyHeadlessKorblox()
     end)
+
     -- ========== MOBILE BUTTONS ==========
     local mobile_ui_button = nil
     local function create_mobile_ui_button()
@@ -841,13 +903,14 @@ task.spawn(function()
         text.ZIndex = 10001
         text.Parent = button
         button.MouseButton1Click:Connect(function()
-            Window:Minimize(not Window.Minimized)
+            Window:Minimize()
         end)
         button.Parent = gui
         gui.Parent = CoreGui
         mobile_ui_button = {gui = gui, button = button}
         return mobile_ui_button
     end
+
     local function create_mobile_button(name, position_y, color, toggleName)
         local gui = Instance.new('ScreenGui')
         gui.Name = 'EagleHub_' .. name .. '_Mobile'
@@ -884,13 +947,16 @@ task.spawn(function()
         gui.Parent = CoreGui
         return {gui = gui, button = button, text = text, bg = bg}
     end
+
     local function destroy_mobile_gui(gui_data)
         if gui_data and gui_data.gui then gui_data.gui:Destroy() end
     end
+
     -- ========== SKIN CHANGER ==========
     local swordInstancesInstance = ReplicatedStorage:WaitForChild("Shared",9e9):WaitForChild("ReplicatedInstances",9e9):WaitForChild("Swords",9e9)
     local SKIN_LAST_EQUIPPED_CONFIG_KEY = "Skin.LastEquippedSword"
     local AUTO_CONFIG_FILE = "LeviHubX/auto_config.json"
+
     local function readLeviHubAutoConfig()
         local data = {}
         pcall(function()
@@ -901,23 +967,27 @@ task.spawn(function()
         end)
         return data
     end
+
     local function writeLeviHubAutoConfig(data)
         pcall(function()
             if isfolder and makefolder and not isfolder("LeviHubX") then makefolder("LeviHubX") end
             if writefile then writefile(AUTO_CONFIG_FILE, HttpService:JSONEncode(data or {})) end
         end)
     end
+
     local function loadLastEquippedSword()
         local data = readLeviHubAutoConfig()
         local saved = data[SKIN_LAST_EQUIPPED_CONFIG_KEY]
         return type(saved) == "string" and saved or ""
     end
+
     getgenv().saveLastEquippedSword = function(swordName)
         if type(swordName) ~= "string" or swordName == "" then return end
         local data = readLeviHubAutoConfig()
         data[SKIN_LAST_EQUIPPED_CONFIG_KEY] = swordName
         writeLeviHubAutoConfig(data)
     end
+
     do
         local savedLastSword = loadLastEquippedSword()
         getgenv().skinChanger = getgenv().skinChanger or savedLastSword ~= ""
@@ -925,11 +995,13 @@ task.spawn(function()
         getgenv().swordAnimations = type(getgenv().swordAnimations) == "string" and getgenv().swordAnimations ~= "" and getgenv().swordAnimations or savedLastSword
         getgenv().swordFX = type(getgenv().swordFX) == "string" and getgenv().swordFX ~= "" and getgenv().swordFX or savedLastSword
     end
+
     task.spawn(function()
         local rs = game:GetService("ReplicatedStorage")
         local swordInstancesInstance = rs:WaitForChild("Shared", 9e9):WaitForChild("ReplicatedInstances", 9e9):WaitForChild("Swords", 9e9)
         local swordInstances = require(swordInstancesInstance)
         local swordsController
+
         task.spawn(function()
             while task.wait(0.25) and not swordsController do
                 local ok, conns = pcall(getconnections, rs.Remotes.FireSwordInfo.OnClientEvent)
@@ -946,10 +1018,12 @@ task.spawn(function()
                 end
             end
         end)
+
         local function getSlashName(swordName)
             local ok, sln = pcall(function() return swordInstances:GetSword(swordName) end)
             return (ok and sln and sln.SlashName) or "SlashEffect"
         end
+
         local function refreshSlashName()
             local fxName = getgenv().swordFX ~= "" and getgenv().swordFX or getgenv().swordModel
             if fxName ~= "" then
@@ -959,6 +1033,7 @@ task.spawn(function()
             end
         end
         refreshSlashName()
+
         local function setSword()
             if not getgenv().skinChanger then return end
             if not LocalPlayer.Character then return end
@@ -1000,6 +1075,7 @@ task.spawn(function()
                 end)
             end)
         end
+
         local hookedFuncs = {}
         task.spawn(function()
             local remotesToHook = {"ParrySuccessAll", "ParryAttempt", "ParrySuccess", "PlaySound", "PlayVisuals"}
@@ -1058,6 +1134,7 @@ task.spawn(function()
                 end
             end
         end)
+
         getgenv().updateSword = function()
             refreshSlashName()
             if getgenv().skinChanger and getgenv().swordModel ~= "" and getgenv().saveLastEquippedSword then
@@ -1065,6 +1142,7 @@ task.spawn(function()
             end
             setSword()
         end
+
         task.spawn(function()
             while task.wait(1) do
                 if getgenv().skinChanger and getgenv().swordModel ~= "" then
@@ -1080,6 +1158,7 @@ task.spawn(function()
                 end
             end
         end)
+
         LocalPlayer.CharacterAdded:Connect(function()
             if getgenv().skinChanger then
                 getgenv().skinChanger = false
@@ -1092,10 +1171,12 @@ task.spawn(function()
             end
         end)
     end)
+
     getgenv().skinChanger=false; getgenv().skinChangerEnabled=false
     getgenv().swordModel=""; getgenv().swordAnimations=""; getgenv().swordFX=""
     getgenv().slashName="SlashEffect"
     getgenv().saveLastEquippedSword=getgenv().saveLastEquippedSword or function() end
+
     -- ========== KEYBIND STATE ==========
     local keybinds = {
         autoParryKeyCode = Enum.KeyCode.LeftShift,
@@ -1103,44 +1184,47 @@ task.spawn(function()
         trigKeyCode = Enum.KeyCode.R,
         autoJumpKeyCode = Enum.KeyCode.J
     }
+
     -- ============================================================
-    -- ========== UI TABS ==========
+    -- ========== UI TABS (WindUI) ==========
     -- ============================================================
-    local autoparry_section = Tabs.Rage:AddSection("Auto Parry", "shield")
-    autoparry_section:AddToggle("AutoParryToggle", {
+
+    -- ========== AUTOPARRY ==========
+    local autoparry_section = Tabs.Rage:Section({ Title = "Auto Parry", Icon = "shield" })
+    autoparry_section:Toggle({
         Title = "Auto Parry",
-        Description = "Automatically parries ball",
-        Default = false,
+        Desc = "Automatically parries ball",
+        Value = false,
         Callback = function(value)
             System.__properties.__autoparry_enabled=value
             System.__properties.__play_animation=value
             if value then System.autoparry.start() else System.autoparry.stop() end
             if getgenv().AutoParryNotify then
-                Fluent:Notify({Title="Auto Parry",Content=value and "ON" or "OFF",Duration=2})
+                Window:Notification({Title="Auto Parry",Content=value and "ON" or "OFF",Duration=2})
             end
         end
     })
-    autoparry_section:AddDropdown("ParryMode", {
-        Title="Parry Mode",
-        Values={"Remote","Keypress"},
-        Default="Remote",
-        Multi=false,
-        Callback=function(value) getgenv().AutoParryMode=value end
+    autoparry_section:Dropdown({
+        Title = "Parry Mode",
+        Values = {"Remote","Keypress"},
+        Value = "Remote",
+        Multi = false,
+        Callback = function(value) getgenv().AutoParryMode=value end
     })
-    autoparry_section:AddDropdown("ModeCurve", {
-        Title="Curve Mode",
-        Values=CURVE_NAMES,
-        Default="Camera",
-        Multi=false,
-        Callback=function(value)
+    autoparry_section:Dropdown({
+        Title = "Curve Mode",
+        Values = CURVE_NAMES,
+        Value = "Camera",
+        Multi = false,
+        Callback = function(value)
             Selected_Parry_Type = value
             CurveType = value
         end
     })
-    autoparry_section:AddToggle("RandomCurveMode", {
-        Title="Random Curve",
-        Default=false,
-        Callback=function(state)
+    autoparry_section:Toggle({
+        Title = "Random Curve",
+        Value = false,
+        Callback = function(state)
             if state then
                 if not System.__properties.__connections.__random_curve then
                     System.__properties.__connections.__random_curve = RunService.PreSimulation:Connect(function()
@@ -1156,58 +1240,56 @@ task.spawn(function()
             end
         end
     })
-    autoparry_section:AddSlider("ParryAccuracy", {
-        Title="Accuracy",
-        Default=50,
-        Min=1,
-        Max=100,
-        Rounding=1,
-        Callback=function(value)
+    autoparry_section:Slider({
+        Title = "Accuracy",
+        Value = { Min = 1, Max = 100, Default = 50 },
+        Rounding = 1,
+        Callback = function(value)
             System.__properties.__accuracy=value; update_divisor()
         end
     })
-    autoparry_section:AddToggle("RandomizeAccuracy", {
-        Title="Randomize Accuracy",
-        Default=false,
-        Callback=function(value)
+    autoparry_section:Toggle({
+        Title = "Randomize Accuracy",
+        Value = false,
+        Callback = function(value)
             System.__properties.__randomized_accuracy_enabled=value
             if value then update_randomized_accuracy() end
         end
     })
-    autoparry_section:AddToggle("CooldownProtection", {
-        Title="Cooldown Protection",
-        Default=false,
-        Callback=function(value) getgenv().CooldownProtection=value end
+    autoparry_section:Toggle({
+        Title = "Cooldown Protection",
+        Value = false,
+        Callback = function(value) getgenv().CooldownProtection=value end
     })
-    autoparry_section:AddToggle("AutoAbility", {
-        Title="Auto Ability",
-        Default=false,
-        Callback=function(value) getgenv().AutoAbility=value end
+    autoparry_section:Toggle({
+        Title = "Auto Ability",
+        Value = false,
+        Callback = function(value) getgenv().AutoAbility=value end
     })
-    autoparry_section:AddToggle("AutoParryNotify", {
-        Title="Notify",
-        Default=false,
-        Callback=function(value) getgenv().AutoParryNotify=value end
+    autoparry_section:Toggle({
+        Title = "Notify",
+        Value = false,
+        Callback = function(value) getgenv().AutoParryNotify=value end
     })
-    local autocurve_section = Tabs.Rage:AddSection("AutoCurve Hotkey", "keyboard")
-    autocurve_section:AddToggle("AutoCurveHotkey", {
-        Title="AutoCurve Hotkey",
-        Default=false,
-        Callback=function(state) getgenv().AutoCurveHotkeyEnabled=state end
+
+    local autocurve_section = Tabs.Rage:Section({ Title = "AutoCurve Hotkey", Icon = "keyboard" })
+    autocurve_section:Toggle({
+        Title = "AutoCurve Hotkey",
+        Value = false,
+        Callback = function(state) getgenv().AutoCurveHotkeyEnabled=state end
     })
-    autocurve_section:AddToggle("AutoCurveHotkeyNotify", {
-        Title="Notify",
-        Default=false,
-        Callback=function(value) getgenv().AutoCurveHotkeyNotify=value end
+    autocurve_section:Toggle({
+        Title = "Notify",
+        Value = false,
+        Callback = function(value) getgenv().AutoCurveHotkeyNotify=value end
     })
-    -- ============================================================
-    -- ========== TRIGGERBOT UI ==========
-    -- ============================================================
-    local triggerbot_section = Tabs.Rage:AddSection("Triggerbot", "target")
-    triggerbot_section:AddToggle("TriggerbotToggle", {
+
+    -- ========== TRIGGERBOT ==========
+    local triggerbot_section = Tabs.Rage:Section({ Title = "Triggerbot", Icon = "target" })
+    triggerbot_section:Toggle({
         Title = "Triggerbot",
-        Description = "Parries instantly if targeted",
-        Default = false,
+        Desc = "Parries instantly if targeted",
+        Value = false,
         Callback = function(value)
             if System.__properties.__is_mobile then
                 if value then
@@ -1239,7 +1321,7 @@ task.spawn(function()
                                     triggerbot_mobile.text.TextColor3 = Color3.fromRGB(255, 255, 255)
                                 end
                                 if getgenv().TriggerbotNotify then
-                                    Fluent:Notify({ Title = "Triggerbot", Content = System.__properties.__triggerbot_enabled and "ON" or "OFF", Duration = 2 })
+                                    Window:Notification({ Title = "Triggerbot", Content = System.__properties.__triggerbot_enabled and "ON" or "OFF", Duration = 2 })
                                 end
                             end
                         end)
@@ -1254,41 +1336,43 @@ task.spawn(function()
                 System.__properties.__triggerbot_enabled = value
                 System.triggerbot.enable(value)
                 if getgenv().TriggerbotNotify then
-                    Fluent:Notify({ Title = "Triggerbot", Content = value and "ON" or "OFF", Duration = 2 })
+                    Window:Notification({ Title = "Triggerbot", Content = value and "ON" or "OFF", Duration = 2 })
                 end
             end
         end
     })
-    triggerbot_section:AddToggle("TriggerbotNotify", {
+    triggerbot_section:Toggle({
         Title = "Notify",
-        Description = "Show notifications for Triggerbot",
-        Default = false,
+        Desc = "Show notifications for Triggerbot",
+        Value = false,
         Callback = function(value) getgenv().TriggerbotNotify = value end
     })
-    -- ============================================================
-    -- ========== DETECTION TAB ==========
-    -- ============================================================
-    local infinity_section=Tabs.Detection:AddSection("Infinity Detection","infinity")
-    infinity_section:AddToggle("InfinityDetection",{Title="Infinity Detection",Default=false,Callback=function(v) System.__config.__detections.__infinity=v end})
-    infinity_section:AddToggle("InfinityNotify",{Title="Notify",Default=false,Callback=function(v) getgenv().InfinityNotify=v end})
-    local deathslash_section=Tabs.Detection:AddSection("Death Slash Detection","skull")
-    deathslash_section:AddToggle("DeathSlashDetection",{Title="Death Slash Detection",Default=false,Callback=function(v) System.__config.__detections.__deathslash=v end})
-    local timehole_section=Tabs.Detection:AddSection("Time Hole Detection","clock")
-    timehole_section:AddToggle("TimeHoleDetection",{Title="Time Hole Detection",Default=false,Callback=function(v) System.__config.__detections.__timehole=v end})
-    local slashes_section=Tabs.Detection:AddSection("Slashes Of Fury Detection","swords")
-    slashes_section:AddToggle("SlashesOfFuryDetection",{Title="Slashes Of Fury Detection",Default=false,Callback=function(v) System.__config.__detections.__slashesoffury=v end})
-    slashes_section:AddSlider("ParryDelay",{Title="Parry Delay",Default=0.05,Min=0.05,Max=0.250,Rounding=2,Callback=function(v) parryDelay=v end})
-    slashes_section:AddSlider("MaxParryCount",{Title="Max Parry Count",Default=35,Min=1,Max=35,Rounding=0,Callback=function(v) maxParryCount=v end})
-    local phantom_section=Tabs.Detection:AddSection("Anti-Phantom","ghost")
-    phantom_section:AddToggle("AntiPhantom",{Title="Anti-Phantom",Default=false,Callback=function(v) System.__config.__detections.__phantom=v end})
-    -- ============================================================
-    -- ========== MANUAL SPAM UI ==========
-    -- ============================================================
-    local manual_spam_section = Tabs.Spam:AddSection("Manual Spam", "zap")
-    manual_spam_section:AddToggle("ManualSpamToggle", {
+
+    -- ========== DETECTION ==========
+    local infinity_section=Tabs.Detection:Section({ Title = "Infinity Detection", Icon = "infinity" })
+    infinity_section:Toggle({Title="Infinity Detection",Value=false,Callback=function(v) System.__config.__detections.__infinity=v end})
+    infinity_section:Toggle({Title="Notify",Value=false,Callback=function(v) getgenv().InfinityNotify=v end})
+
+    local deathslash_section=Tabs.Detection:Section({ Title = "Death Slash Detection", Icon = "skull" })
+    deathslash_section:Toggle({Title="Death Slash Detection",Value=false,Callback=function(v) System.__config.__detections.__deathslash=v end})
+
+    local timehole_section=Tabs.Detection:Section({ Title = "Time Hole Detection", Icon = "clock" })
+    timehole_section:Toggle({Title="Time Hole Detection",Value=false,Callback=function(v) System.__config.__detections.__timehole=v end})
+
+    local slashes_section=Tabs.Detection:Section({ Title = "Slashes Of Fury Detection", Icon = "swords" })
+    slashes_section:Toggle({Title="Slashes Of Fury Detection",Value=false,Callback=function(v) System.__config.__detections.__slashesoffury=v end})
+    slashes_section:Slider({Title="Parry Delay",Value={Min=0.05,Max=0.250,Default=0.05},Rounding=2,Callback=function(v) parryDelay=v end})
+    slashes_section:Slider({Title="Max Parry Count",Value={Min=1,Max=35,Default=35},Rounding=0,Callback=function(v) maxParryCount=v end})
+
+    local phantom_section=Tabs.Detection:Section({ Title = "Anti-Phantom", Icon = "ghost" })
+    phantom_section:Toggle({Title="Anti-Phantom",Value=false,Callback=function(v) System.__config.__detections.__phantom=v end})
+
+    -- ========== MANUAL SPAM ==========
+    local manual_spam_section = Tabs.Spam:Section({ Title = "Manual Spam", Icon = "zap" })
+    manual_spam_section:Toggle({
         Title = "Manual Spam",
-        Description = "High-frequency parry spam",
-        Default = false,
+        Desc = "High-frequency parry spam",
+        Value = false,
         Callback = function(state)
             if System.__properties.__is_mobile then
                 if state then
@@ -1321,7 +1405,7 @@ task.spawn(function()
                                     manual_spam_mobile.text.TextColor3 = Color3.fromRGB(255, 255, 255)
                                 end
                                 if getgenv().ManualSpamNotify then
-                                    Fluent:Notify({ Title = "Manual Spam", Content = System.__properties.__manual_spam_enabled and "ON" or "OFF", Duration = 2 })
+                                    Window:Notification({ Title = "Manual Spam", Content = System.__properties.__manual_spam_enabled and "ON" or "OFF", Duration = 2 })
                                 end
                             end
                         end)
@@ -1337,43 +1421,41 @@ task.spawn(function()
                 macroSpamActive = state
                 if state then
                     System.manual_spam.start()
-                    if getgenv().ManualSpamNotify then Fluent:Notify({Title="Manual Spam", Content="ON", Duration=2}) end
+                    if getgenv().ManualSpamNotify then Window:Notification({Title="Manual Spam", Content="ON", Duration=2}) end
                 else
                     System.manual_spam.stop()
-                    if getgenv().ManualSpamNotify then Fluent:Notify({Title="Manual Spam", Content="OFF", Duration=2}) end
+                    if getgenv().ManualSpamNotify then Window:Notification({Title="Manual Spam", Content="OFF", Duration=2}) end
                 end
             end
         end
     })
-    manual_spam_section:AddToggle("ManualSpamNotify", {
+    manual_spam_section:Toggle({
         Title = "Notify",
-        Description = "Show notifications for manual spam",
-        Default = false,
+        Desc = "Show notifications for manual spam",
+        Value = false,
         Callback = function(value) getgenv().ManualSpamNotify = value end
     })
-    manual_spam_section:AddDropdown("ManualSpamMode", {
+    manual_spam_section:Dropdown({
         Title = "Mode",
-        Description = "Select spam method",
+        Desc = "Select spam method",
         Values = {"Remote", "Keypress"},
-        Default = "Remote",
+        Value = "Remote",
         Multi = false,
         Callback = function(Value) getgenv().ManualSpamMode = Value end
     })
-    manual_spam_section:AddToggle("ManualSpamAnimationFix", {
+    manual_spam_section:Toggle({
         Title = "Animation Fix",
-        Description = "Fix animation during spam",
-        Default = false,
+        Desc = "Fix animation during spam",
+        Value = false,
         Callback = function(value)
             getgenv().ManualSpamAnimationFix = value
             macroAnimFix = value
         end
     })
-    -- ============================================================
-    -- ========== BALL STATS + PING (Visuals tab) ==========
-    -- ============================================================
-    local ball_velocity_section = Tabs.Visuals:AddSection("Ball Stats", "gauge")
-    local pingLabel = nil
-    -- Ball Velocity GUI
+
+    -- ========== BALL STATS + PING ==========
+    local ball_velocity_section = Tabs.Visuals:Section({ Title = "Ball Stats", Icon = "gauge" })
+
     function System.create_ball_velocity_gui()
         if System.__properties.__ball_velocity_gui then
             System.__properties.__ball_velocity_gui.gui:Destroy()
@@ -1446,6 +1528,7 @@ task.spawn(function()
             peakSpeedLabel = peakSpeedLabel
         }
     end
+
     function System.update_ball_velocity()
         if not System.__properties.__ball_velocity_enabled or not System.__properties.__ball_velocity_gui then return end
         local ball = System.ball.get()
@@ -1483,10 +1566,11 @@ task.spawn(function()
         System.__properties.__ball_velocity_gui.peakSpeedLabel.RichText = true
         System.__properties.__ball_velocity_gui.peakSpeedLabel.Text = peakText
     end
-    ball_velocity_section:AddToggle("BallVelocity", {
+
+    ball_velocity_section:Toggle({
         Title = "Show Ball Velocity",
-        Description = "Display ball velocity stats",
-        Default = false,
+        Desc = "Display ball velocity stats",
+        Value = false,
         Callback = function(value)
             System.__properties.__ball_velocity_enabled = value
             if value then
@@ -1496,7 +1580,7 @@ task.spawn(function()
                         System.update_ball_velocity()
                     end)
                 end
-                Fluent:Notify({ Title = "Ball Stats", Content = "Activated", Duration = 2 })
+                Window:Notification({ Title = "Ball Stats", Content = "Activated", Duration = 2 })
             else
                 if System.__properties.__ball_velocity_gui then
                     System.__properties.__ball_velocity_gui.gui:Destroy()
@@ -1508,13 +1592,12 @@ task.spawn(function()
                 end
                 System.__properties.__peak_velocity = 0
                 System.__properties.__last_ball_id = nil
-                Fluent:Notify({ Title = "Ball Stats", Content = "Deactivated", Duration = 2 })
+                Window:Notification({ Title = "Ball Stats", Content = "Deactivated", Duration = 2 })
             end
         end
     })
-    -- ============================================================
-    -- ========== SHOW REAL PING UI (Draggable) ==========
-    -- ============================================================
+
+    -- ========== SHOW REAL PING ==========
     local PingGui = Instance.new("ScreenGui", CoreGui)
     PingGui.Name = "EagleRealPing"
     PingGui.ResetOnSpawn = false
@@ -1539,14 +1622,15 @@ task.spawn(function()
     PingLabel.Font = Enum.Font.GothamBold
     PingLabel.TextSize = 14
     PingLabel.TextXAlignment = Enum.TextXAlignment.Center
-    ball_velocity_section:AddToggle("ShowPing", {
+
+    ball_velocity_section:Toggle({
         Title = "Show Real Ping",
-        Description = "Shows your current ping",
-        Default = false,
+        Desc = "Shows your current ping",
+        Value = false,
         Callback = function(value)
             PingGui.Enabled = value
             if value then
-                Fluent:Notify({Title="Real Ping", Content="Activated", Duration=2})
+                Window:Notification({Title="Real Ping", Content="Activated", Duration=2})
                 task.spawn(function()
                     while PingGui.Enabled do
                         task.wait(0.5)
@@ -1561,27 +1645,26 @@ task.spawn(function()
                     end
                 end)
             else
-                Fluent:Notify({Title="Real Ping", Content="Deactivated", Duration=2})
+                Window:Notification({Title="Real Ping", Content="Deactivated", Duration=2})
             end
         end
     })
-    -- ============================================================
-    -- ========== AUTO JUMP (Eagle free66-dan) ==========
-    -- ============================================================
+
+    -- ========== AUTO JUMP ==========
     local AutoJump = false
     local ajLastOnGround = false
-    local auto_jump_section = Tabs.Misc:AddSection("Auto Jump", "arrow-up")
-    auto_jump_section:AddToggle("AutoJump", {
+    local auto_jump_section = Tabs.Misc:Section({ Title = "Auto Jump", Icon = "arrow-up" })
+    auto_jump_section:Toggle({
         Title = "Auto Jump",
-        Description = "Automatically jumps when grounded",
-        Default = false,
+        Desc = "Automatically jumps when grounded",
+        Value = false,
         Callback = function(value)
             AutoJump = value
             if not value then ajLastOnGround = false end
-            Fluent:Notify({Title="Auto Jump", Content=value and "Enabled" or "Disabled", Duration=2})
+            Window:Notification({Title="Auto Jump", Content=value and "Enabled" or "Disabled", Duration=2})
         end
     })
-    -- Heartbeat-də Auto Jump (Eagle free66-dan)
+
     RunService.Heartbeat:Connect(function()
         if AutoJump then
             local char = LocalPlayer.Character
@@ -1597,75 +1680,78 @@ task.spawn(function()
             ajLastOnGround = false
         end
     end)
-    local headless_section = Tabs.Misc:AddSection("Headless & Korblox", "user")
-    headless_section:AddToggle("HeadlessToggle", {
+
+    local headless_section = Tabs.Misc:Section({ Title = "Headless & Korblox", Icon = "user" })
+    headless_section:Toggle({
         Title = "Headless",
-        Description = "Makes your character headless",
-        Default = false,
+        Desc = "Makes your character headless",
+        Value = false,
         Callback = function(value)
             System.__properties.__headless_enabled = value
             local char = LocalPlayer.Character
             if char then
                 if value then Byte_Library.Headless(char) else Byte_Library.Restore_Head(char) end
             end
-            Fluent:Notify({Title="Headless", Content=value and "Enabled" or "Disabled", Duration=2})
+            Window:Notification({Title="Headless", Content=value and "Enabled" or "Disabled", Duration=2})
         end
     })
-    headless_section:AddToggle("KorbloxToggle", {
+    headless_section:Toggle({
         Title = "Korblox",
-        Description = "Gives you Korblox leg",
-        Default = false,
+        Desc = "Gives you Korblox leg",
+        Value = false,
         Callback = function(value)
             System.__properties.__korblox_enabled = value
             local char = LocalPlayer.Character
             if char then
                 if value then Byte_Library.Korblox(char) else Byte_Library.Restore_Leg(char) end
             end
-            Fluent:Notify({Title="Korblox", Content=value and "Enabled" or "Disabled", Duration=2})
+            Window:Notification({Title="Korblox", Content=value and "Enabled" or "Disabled", Duration=2})
         end
     })
-    local thunder_dash_section = Tabs.Misc:AddSection("Thunder Dash", "zap")
-    thunder_dash_section:AddToggle("ThunderDashToggle", {
+
+    local thunder_dash_section = Tabs.Misc:Section({ Title = "Thunder Dash", Icon = "zap" })
+    thunder_dash_section:Toggle({
         Title = "Thunder Dash",
-        Description = "Removes all ability cooldowns (Infinite Thunder Dash)",
-        Default = false,
+        Desc = "Removes all ability cooldowns (Infinite Thunder Dash)",
+        Value = false,
         Callback = function(value)
             if value then
                 ThunderDash:Enable()
-                Fluent:Notify({Title="Thunder Dash", Content="Enabled - Infinite Abilities!", Duration=3})
+                Window:Notification({Title="Thunder Dash", Content="Enabled - Infinite Abilities!", Duration=3})
             else
                 ThunderDash:Disable()
-                Fluent:Notify({Title="Thunder Dash", Content="Disabled", Duration=2})
+                Window:Notification({Title="Thunder Dash", Content="Disabled", Duration=2})
             end
         end
     })
-    local skin_changer_section = Tabs.Misc:AddSection("Skin Changer", "sword")
-    local skinChangerToggle = skin_changer_section:AddToggle("SkinChanger", {
+
+    local skin_changer_section = Tabs.Misc:Section({ Title = "Skin Changer", Icon = "sword" })
+    local skinChangerToggle = skin_changer_section:Toggle({
         Title = "Skin Changer",
-        Description = "Changes your sword skin",
-        Default = false,
+        Desc = "Changes your sword skin",
+        Value = false,
         Callback = function(value)
             getgenv().skinChanger = value
             getgenv().skinChangerEnabled = value
             if value and getgenv().swordModel ~= "" then
                 if getgenv().updateSword then pcall(getgenv().updateSword) end
-                Fluent:Notify({Title="Skin Changer", Content="Enabled", Duration=2})
+                Window:Notification({Title="Skin Changer", Content="Enabled", Duration=2})
             elseif not value then
-                Fluent:Notify({Title="Skin Changer", Content="Disabled", Duration=2})
+                Window:Notification({Title="Skin Changer", Content="Disabled", Duration=2})
             end
         end
     })
     getgenv().setSkinChangerToggleUI = function(v)
         if skinChangerToggle and skinChangerToggle.Value ~= v then
-            skinChangerToggle:SetValue(v)
+            skinChangerToggle:Set(v)
             getgenv().skinChanger = v
             getgenv().skinChangerEnabled = v
         end
     end
-    skin_changer_section:AddInput("SwordName", {
+    skin_changer_section:Input({
         Title = "Sword Name",
+        Value = "",
         Placeholder = "Enter sword name (e.g. DualPrince)...",
-        Default = "",
         Callback = function(text)
             getgenv().swordModel = text
             getgenv().swordAnimations = text
@@ -1676,17 +1762,18 @@ task.spawn(function()
             if getgenv().saveLastEquippedSword then pcall(getgenv().saveLastEquippedSword, text) end
         end
     })
-    skin_changer_section:AddToggle("SaveLastSword", {
+    skin_changer_section:Toggle({
         Title = "Save Last Equipped Sword",
-        Description = "Auto-loads your last sword on inject",
-        Default = true,
+        Desc = "Auto-loads your last sword on inject",
+        Value = true,
         Callback = function(v) getgenv().autoLoadLastSword = v end
     })
-    local no_render_section = Tabs.Misc:AddSection("No Render", "eye-off")
+
+    local no_render_section = Tabs.Misc:Section({ Title = "No Render", Icon = "eye-off" })
     local Connections_Manager = {}
-    no_render_section:AddToggle("NoRender", {
+    no_render_section:Toggle({
         Title = "No Render",
-        Default = false,
+        Value = false,
         Callback = function(state)
             local effectScripts = LocalPlayer.PlayerScripts:FindFirstChild("EffectScripts")
             if effectScripts then
@@ -1705,44 +1792,30 @@ task.spawn(function()
             end
         end
     })
-    -- ============================================================
-    -- ========== SETTINGS TAB - Config + Keybinds ==========
-    -- ============================================================
-    SaveManager:SetLibrary(Fluent)
-    InterfaceManager:SetLibrary(Fluent)
-    SaveManager:IgnoreThemeSettings()
-    InterfaceManager:SetFolder("EAGLE Hub X")
-    SaveManager:SetFolder("EAGLE Hub X/configs")
-    InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-    SaveManager:BuildConfigSection(Tabs.Settings)
-    Window:SelectTab(1)
-    SaveManager:LoadAutoloadConfig()
-    -- Keybinds Section
-    local keybinds_section = Tabs.Settings:AddSection("Keybinds", "keyboard")
-    -- Manual Spam Keybind - DÜZGÜN (Enum.KeyCode.K xətası düzəldildi)
-    keybinds_section:AddKeybind("ManualSpamKeybind", {
+
+    -- ========== SETTINGS TAB - Keybinds ==========
+    local keybinds_section = Tabs.Settings:Section({ Title = "Keybinds", Icon = "keyboard" })
+    keybinds_section:Keybind({
         Title = "Manual Spam Key",
-        Description = "Toggle Manual Spam",
-        Default = "E",
+        Desc = "Toggle Manual Spam",
+        Value = "E",
         Callback = function() end,
         ChangedCallback = function(k)
             local keyName = tostring(k)
             if keyName and keyName ~= "" then
-                -- "Enum.KeyCode.K" -> "K" al
                 local cleanName = keyName:match("Enum%.KeyCode%.(.+)") or keyName
                 local kc = Enum.KeyCode[cleanName]
                 if kc then
                     keybinds.manualSpamKeyCode = kc
-                    Fluent:Notify({Title="Manual Spam Key", Content=cleanName, Duration=2})
+                    Window:Notification({Title="Manual Spam Key", Content=cleanName, Duration=2})
                 end
             end
         end
     })
-    -- Trigger Keybind - DÜZGÜN
-    keybinds_section:AddKeybind("TriggerKeybind", {
+    keybinds_section:Keybind({
         Title = "Trigger Key",
-        Description = "Toggle Triggerbot",
-        Default = "R",
+        Desc = "Toggle Triggerbot",
+        Value = "R",
         Callback = function() end,
         ChangedCallback = function(k)
             local keyName = tostring(k)
@@ -1751,16 +1824,15 @@ task.spawn(function()
                 local kc = Enum.KeyCode[cleanName]
                 if kc then
                     keybinds.trigKeyCode = kc
-                    Fluent:Notify({Title="Trigger Key", Content=cleanName, Duration=2})
+                    Window:Notification({Title="Trigger Key", Content=cleanName, Duration=2})
                 end
             end
         end
     })
-    -- Auto Jump Keybind - DÜZGÜN
-    keybinds_section:AddKeybind("AutoJumpKeybind", {
+    keybinds_section:Keybind({
         Title = "Auto Jump Key",
-        Description = "Toggle Auto Jump",
-        Default = "J",
+        Desc = "Toggle Auto Jump",
+        Value = "J",
         Callback = function() end,
         ChangedCallback = function(k)
             local keyName = tostring(k)
@@ -1769,16 +1841,15 @@ task.spawn(function()
                 local kc = Enum.KeyCode[cleanName]
                 if kc then
                     keybinds.autoJumpKeyCode = kc
-                    Fluent:Notify({Title="Auto Jump Key", Content=cleanName, Duration=2})
+                    Window:Notification({Title="Auto Jump Key", Content=cleanName, Duration=2})
                 end
             end
         end
     })
-    -- Auto Parry Keybind - DÜZGÜN
-    keybinds_section:AddKeybind("AutoParryKeybind", {
+    keybinds_section:Keybind({
         Title = "Auto Parry Key",
-        Description = "Toggle Auto Parry",
-        Default = "LeftShift",
+        Desc = "Toggle Auto Parry",
+        Value = "LeftShift",
         Callback = function() end,
         ChangedCallback = function(k)
             local keyName = tostring(k)
@@ -1787,14 +1858,13 @@ task.spawn(function()
                 local kc = Enum.KeyCode[cleanName]
                 if kc then
                     keybinds.autoParryKeyCode = kc
-                    Fluent:Notify({Title="Auto Parry Key", Content=cleanName, Duration=2})
+                    Window:Notification({Title="Auto Parry Key", Content=cleanName, Duration=2})
                 end
             end
         end
     })
-    -- ============================================================
+
     -- ========== CURVE HOTKEY (1-9) ==========
-    -- ============================================================
     UserInputService.InputBegan:Connect(function(input, gp)
         if gp then return end
         local kc = input.KeyCode
@@ -1813,54 +1883,50 @@ task.spawn(function()
             Selected_Parry_Type = curve_map[kc]
             CurveType = curve_map[kc]
             if getgenv().AutoCurveHotkeyNotify then
-                Fluent:Notify({Title="Curve Mode", Content=curve_map[kc], Duration=1})
+                Window:Notification({Title="Curve Mode", Content=curve_map[kc], Duration=1})
             end
         end
     end)
-    -- ============================================================
+
     -- ========== KEYBIND INPUT HANDLER ==========
-    -- ============================================================
     UserInputService.InputBegan:Connect(function(input, gp)
         if gp then return end
         local kc = input.KeyCode
-        -- Manual Spam
         if kc == keybinds.manualSpamKeyCode then
             System.__properties.__manual_spam_enabled = not System.__properties.__manual_spam_enabled
             macroSpamActive = System.__properties.__manual_spam_enabled
             if macroSpamActive then System.manual_spam.start() else System.manual_spam.stop() end
             if getgenv().ManualSpamNotify then
-                Fluent:Notify({Title="Manual Spam", Content=macroSpamActive and "ON" or "OFF", Duration=1})
+                Window:Notification({Title="Manual Spam", Content=macroSpamActive and "ON" or "OFF", Duration=1})
             end
         end
-        -- Triggerbot
         if kc == keybinds.trigKeyCode then
             local ns = not System.__properties.__triggerbot_enabled
             System.__properties.__triggerbot_enabled = ns
             System.triggerbot.enable(ns)
             if getgenv().TriggerbotNotify then
-                Fluent:Notify({Title="Triggerbot", Content=ns and "ON" or "OFF", Duration=1})
+                Window:Notification({Title="Triggerbot", Content=ns and "ON" or "OFF", Duration=1})
             end
         end
-        -- Auto Parry
         if kc == keybinds.autoParryKeyCode then
             System.__properties.__autoparry_enabled = not System.__properties.__autoparry_enabled
             System.__properties.__play_animation = System.__properties.__autoparry_enabled
             if System.__properties.__autoparry_enabled then System.autoparry.start() else System.autoparry.stop() end
             if getgenv().AutoParryNotify then
-                Fluent:Notify({Title="Auto Parry", Content=System.__properties.__autoparry_enabled and "ON" or "OFF", Duration=1})
+                Window:Notification({Title="Auto Parry", Content=System.__properties.__autoparry_enabled and "ON" or "OFF", Duration=1})
             end
         end
-        -- Auto Jump
         if kc == keybinds.autoJumpKeyCode then
             AutoJump = not AutoJump
             if AutoJump then
-                Fluent:Notify({Title="Auto Jump", Content="ON", Duration=1})
+                Window:Notification({Title="Auto Jump", Content="ON", Duration=1})
             else
                 ajLastOnGround = false
-                Fluent:Notify({Title="Auto Jump", Content="OFF", Duration=1})
+                Window:Notification({Title="Auto Jump", Content="OFF", Duration=1})
             end
         end
     end)
+
     -- ========== Mobile UI Button ==========
     if System.__properties.__is_mobile then
         task.spawn(function()
@@ -1868,8 +1934,9 @@ task.spawn(function()
             create_mobile_ui_button()
         end)
     end
+
     -- ========== Final Notification ==========
-    Fluent:Notify({
+    Window:Notification({
         Title = "BluehavenHub X",
         Content = "Loaded Successfully frist block your self!",
         Duration = 10
