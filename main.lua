@@ -7,7 +7,7 @@ task.spawn(function()
 
     local Window = WindUI:CreateWindow({
         Title = "Bluehaven Hub",
-        Icon = "rbxassetid://81012672948371",
+        Icon = "rbxassetid://71760811781401",
         Author = "v1.0",
         Folder = "BluehavenHub",
         Size = UDim2.fromOffset(580, 460),
