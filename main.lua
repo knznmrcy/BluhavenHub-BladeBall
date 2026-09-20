@@ -10,13 +10,22 @@ task.spawn(function()
         Icon = "rbxassetid://71760811781401",
         Author = "v1.0",
         Folder = "BluehavenHub",
-        Size = UDim2.fromOffset(720, 520),
+        Size = UDim2.fromOffset(700, 540),
         Transparent = true,
         Theme = "Dark",
-        SideBarWidth = 180,
+        SideBarWidth = 160,
         HasOutline = true,
         KeySystem = false,
     })
+
+    task.spawn(function()
+        task.wait(0.5)
+        for _, v in pairs(CoreGui:GetDescendants()) do
+            if v:IsA("ImageLabel") and v.Image == "rbxassetid://71760811781401" then
+                v.Size = UDim2.fromOffset(40, 40)
+            end
+        end
+    end)
 
     local Tabs = {
         Autoparry = Window:Tab({ Title = "Autoparry", Icon = "sword" }),
