@@ -4,35 +4,27 @@ task.spawn(function()
     -- ============================================================
     local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
     WindUI:SetTheme("Dark")
-    WindUI:SetTransparency(0.15)
 
     local Window = WindUI:CreateWindow({
-        Title = "Bluehaven Hub - VD",
+        Title = "Bluehaven Hub",
         Icon = "rbxassetid://81012672948371",
         Author = "v1.0",
         Folder = "BluehavenHub",
-        Size = UDim2.fromOffset(720, 480),
+        Size = UDim2.fromOffset(580, 460),
         Transparent = true,
         Theme = "Dark",
-        SideBarWidth = 175,
+        SideBarWidth = 160,
         HasOutline = true,
         KeySystem = false,
-        User = {
-            Enabled = true,
-            Anonymous = false,
-            Callback = function() end,
-        },
     })
 
-    -- Sidebar tabs sesuai gambar
     local Tabs = {
-        About    = Window:Tab({ Title = "About",    Icon = "info" }),
-        Player   = Window:Tab({ Title = "Player",   Icon = "user" }),
-        Aim      = Window:Tab({ Title = "Aim",      Icon = "crosshair" }),
-        ESP      = Window:Tab({ Title = "ESP",      Icon = "eye" }),
-        Misc     = Window:Tab({ Title = "Misc",     Icon = "settings" }),
-        Visual   = Window:Tab({ Title = "Visual",   Icon = "monitor" }),
-        Settings = Window:Tab({ Title = "Settings", Icon = "sliders" }),
+        Autoparry = Window:Tab({ Title = "Autoparry", Icon = "sword" }),
+        Spam      = Window:Tab({ Title = "Spam",      Icon = "skull" }),
+        Detection = Window:Tab({ Title = "Detection", Icon = "eye" }),
+        Visuals   = Window:Tab({ Title = "Visuals",   Icon = "monitor" }),
+        Misc      = Window:Tab({ Title = "Misc",      Icon = "settings" }),
+        Settings  = Window:Tab({ Title = "Settings",  Icon = "sliders" }),
     }
 
     repeat task.wait(0.5) until game:IsLoaded()
@@ -1144,15 +1136,8 @@ task.spawn(function()
     -- ========== UI TABS (WindUI) ==========
     -- ============================================================
 
-    -- ========== ABOUT ==========
-    local about_section = Tabs.About:Section({ Title = "About", Icon = "info" })
-    about_section:Paragraph({
-        Title = "Bluehaven Hub",
-        Desc = "Version v1.0\nBest X Build\nMade with WindUI",
-    })
-
-    -- ========== AUTOPARRY (Player tab) ==========
-    local autoparry_section = Tabs.Player:Section({ Title = "Auto Parry", Icon = "shield" })
+    -- ========== AUTOPARRY ==========
+    local autoparry_section = Tabs.Autoparry:Section({ Title = "Auto Parry", Icon = "shield" })
     autoparry_section:Toggle({
         Title = "Auto Parry",
         Desc = "Automatically parries ball",
@@ -1234,7 +1219,7 @@ task.spawn(function()
         Callback = function(value) getgenv().AutoParryNotify=value end
     })
 
-    local autocurve_section = Tabs.Player:Section({ Title = "AutoCurve Hotkey", Icon = "keyboard" })
+    local autocurve_section = Tabs.Autoparry:Section({ Title = "AutoCurve Hotkey", Icon = "keyboard" })
     autocurve_section:Toggle({
         Title = "AutoCurve Hotkey",
         Value = false,
@@ -1246,8 +1231,8 @@ task.spawn(function()
         Callback = function(value) getgenv().AutoCurveHotkeyNotify=value end
     })
 
-    -- ========== TRIGGERBOT (Aim tab) ==========
-    local triggerbot_section = Tabs.Aim:Section({ Title = "Triggerbot", Icon = "target" })
+    -- ========== TRIGGERBOT ==========
+    local triggerbot_section = Tabs.Autoparry:Section({ Title = "Triggerbot", Icon = "target" })
     triggerbot_section:Toggle({
         Title = "Triggerbot",
         Desc = "Parries instantly if targeted",
@@ -1310,27 +1295,27 @@ task.spawn(function()
         Callback = function(value) getgenv().TriggerbotNotify = value end
     })
 
-    -- ========== DETECTION (Aim tab) ==========
-    local infinity_section=Tabs.Aim:Section({ Title = "Infinity Detection", Icon = "infinity" })
+    -- ========== DETECTION ==========
+    local infinity_section=Tabs.Detection:Section({ Title = "Infinity Detection", Icon = "infinity" })
     infinity_section:Toggle({Title="Infinity Detection",Value=false,Callback=function(v) System.__config.__detections.__infinity=v end})
     infinity_section:Toggle({Title="Notify",Value=false,Callback=function(v) getgenv().InfinityNotify=v end})
 
-    local deathslash_section=Tabs.Aim:Section({ Title = "Death Slash Detection", Icon = "skull" })
+    local deathslash_section=Tabs.Detection:Section({ Title = "Death Slash Detection", Icon = "skull" })
     deathslash_section:Toggle({Title="Death Slash Detection",Value=false,Callback=function(v) System.__config.__detections.__deathslash=v end})
 
-    local timehole_section=Tabs.Aim:Section({ Title = "Time Hole Detection", Icon = "clock" })
+    local timehole_section=Tabs.Detection:Section({ Title = "Time Hole Detection", Icon = "clock" })
     timehole_section:Toggle({Title="Time Hole Detection",Value=false,Callback=function(v) System.__config.__detections.__timehole=v end})
 
-    local slashes_section=Tabs.Aim:Section({ Title = "Slashes Of Fury Detection", Icon = "swords" })
+    local slashes_section=Tabs.Detection:Section({ Title = "Slashes Of Fury Detection", Icon = "swords" })
     slashes_section:Toggle({Title="Slashes Of Fury Detection",Value=false,Callback=function(v) System.__config.__detections.__slashesoffury=v end})
     slashes_section:Slider({Title="Parry Delay",Value={Min=0.05,Max=0.250,Default=0.05},Rounding=2,Callback=function(v) parryDelay=v end})
     slashes_section:Slider({Title="Max Parry Count",Value={Min=1,Max=35,Default=35},Rounding=0,Callback=function(v) maxParryCount=v end})
 
-    local phantom_section=Tabs.Aim:Section({ Title = "Anti-Phantom", Icon = "ghost" })
+    local phantom_section=Tabs.Detection:Section({ Title = "Anti-Phantom", Icon = "ghost" })
     phantom_section:Toggle({Title="Anti-Phantom",Value=false,Callback=function(v) System.__config.__detections.__phantom=v end})
 
-    -- ========== MANUAL SPAM (ESP tab) ==========
-    local manual_spam_section = Tabs.ESP:Section({ Title = "Manual Spam", Icon = "zap" })
+    -- ========== MANUAL SPAM ==========
+    local manual_spam_section = Tabs.Spam:Section({ Title = "Manual Spam", Icon = "zap" })
     manual_spam_section:Toggle({
         Title = "Manual Spam",
         Desc = "High-frequency parry spam",
@@ -1415,8 +1400,8 @@ task.spawn(function()
         end
     })
 
-    -- ========== BALL STATS + PING (Visual tab) ==========
-    local ball_velocity_section = Tabs.Visual:Section({ Title = "Ball Stats", Icon = "gauge" })
+    -- ========== BALL STATS + PING ==========
+    local ball_velocity_section = Tabs.Visuals:Section({ Title = "Ball Stats", Icon = "gauge" })
     function System.create_ball_velocity_gui()
         if System.__properties.__ball_velocity_gui then
             System.__properties.__ball_velocity_gui.gui:Destroy()
@@ -1606,7 +1591,7 @@ task.spawn(function()
         end
     })
 
-    -- ========== AUTO JUMP (Misc tab) ==========
+    -- ========== AUTO JUMP ==========
     local AutoJump = false
     local ajLastOnGround = false
     local auto_jump_section = Tabs.Misc:Section({ Title = "Auto Jump", Icon = "arrow-up" })
