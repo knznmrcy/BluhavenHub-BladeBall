@@ -4,7 +4,6 @@ task.spawn(function()
     -- ============================================================
     local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
     WindUI:SetTheme("Dark")
-    WindUI:SetAccentColor(Color3.fromRGB(0, 120, 255))
 
     local Window = WindUI:CreateWindow({
         Title = "Bluehaven Hub",
@@ -17,8 +16,6 @@ task.spawn(function()
         SideBarWidth = 180,
         HasOutline = true,
         KeySystem = false,
-        Background = Color3.fromRGB(10, 20, 40),
-        IconThemed = true,
     })
 
     local Tabs = {
@@ -47,37 +44,6 @@ task.spawn(function()
     if not LocalPlayer.Character then LocalPlayer.CharacterAdded:Wait() end
     local Alive   = Workspace:FindFirstChild("Alive") or Workspace:WaitForChild("Alive")
     local Runtime = Workspace.Runtime
-
-    -- ============================================================
-    -- ========== PING FIX (pakai GetValueString + fallback) ============
-    -- ============================================================
-    local function GetRealPing()
-        -- Cara 1: GetValueString (paling akurat)
-        local ok, ping_str = pcall(function()
-            return Stats.Network.ServerStatsItem["Data Ping"]:GetValueString()
-        end)
-        if ok and ping_str then
-            local num = tonumber(ping_str:match("([%d%.]+)"))
-            if num and num > 0 then return math.floor(num) end
-        end
-
-        -- Cara 2: GetValue
-        local ok2, val = pcall(function()
-            return Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
-        end)
-        if ok2 and type(val) == "number" and val > 0 then
-            return math.floor(val)
-        end
-
-        -- Cara 3: Manual pakai Workspace:GetServerTimeNow() vs tick()
-        local ok3, server_time = pcall(function() return workspace:GetServerTimeNow() end)
-        if ok3 and server_time then
-            local diff = math.abs(server_time - tick())
-            if diff > 0 and diff < 5 then return math.floor(diff * 1000) end
-        end
-
-        return 0
-    end
 
     local function detectMobile()
         local touch    = UserInputService.TouchEnabled
@@ -121,7 +87,8 @@ task.spawn(function()
     end
     local function update_randomized_accuracy()
         if not System.__properties.__randomized_accuracy_enabled then return end
-        local ping = GetRealPing()
+        local ping_str = Stats.Network.ServerStatsItem["Data Ping"]:GetValueString()
+        local ping = tonumber(ping_str:match("%d+")) or 0
         local new_accuracy
         if ping >= 90 then new_accuracy = 4
         elseif ping <= 50 then new_accuracy = math.random(70, 100)
@@ -461,7 +428,7 @@ task.spawn(function()
         if not char or not char.PrimaryPart then return false end
         local pos = char.PrimaryPart.Position; local direction = (pos - ball.Position).Unit
         local dot = direction:Dot(ball_dir)
-        local ping = GetRealPing() / 1000
+        local ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValue()/1000
         local distance = (pos - ball.Position).Magnitude; local reach_time = distance/speed - ping
         local dot_threshold = math.clamp(0.55 - (ping*0.75), -1, 0.45)
         local speed_threshold = math.min(speed/100, 45)
@@ -563,7 +530,7 @@ task.spawn(function()
         local Velocity = Zoomies.VectorVelocity; local Ball_Direction = Velocity.Unit
         local Direction = (LocalPlayer.Character.PrimaryPart.Position - Ball.Position).Unit
         local Dot = Direction:Dot(Ball_Direction)
-        local Pings = GetRealPing()
+        local Pings = Stats.Network.ServerStatsItem['Data Ping']:GetValue()
         local Speed_Threshold = math.min(Speed/100, 40)
         local Reach_Time = Distance/Speed - (Pings/1000)
         local Enough_Speed = Speed > 1
@@ -710,7 +677,7 @@ task.spawn(function()
                 local ball_target = ball:GetAttribute('target')
                 local velocity = zoomies.VectorVelocity
                 local distance = (LocalPlayer.Character.PrimaryPart.Position - ball.Position).Magnitude
-                local ping = GetRealPing()/10
+                local ping = Stats.Network.ServerStatsItem['Data Ping']:GetValue()/10
                 local ping_threshold = math.clamp(ping/10, 5, 17)
                 local speed = velocity.Magnitude
                 local capped_speed_diff = math.min(math.max(speed-9.5, 0), 650)
@@ -768,7 +735,7 @@ task.spawn(function()
                         local velocity = zoomies.VectorVelocity
                         local distance = LocalPlayer:DistanceFromCharacter(training_ball.Position)
                         local speed = velocity.Magnitude
-                        local ping = GetRealPing()/10
+                        local ping = Stats.Network.ServerStatsItem['Data Ping']:GetValue()/10
                         local ping_threshold = math.clamp(ping/10, 5, 17)
                         local capped_speed_diff = math.min(math.max(speed-9.5, 0), 650)
                         local speed_divisor = (2.4 + capped_speed_diff*0.002) * System.__properties.__divisor_multiplier
@@ -1609,7 +1576,7 @@ task.spawn(function()
                     while PingGui.Enabled do
                         task.wait(0.5)
                         if PingGui.Enabled and PingLabel then
-                            local ping = GetRealPing()
+                            local ping = Stats.Network.ServerStatsItem['Data Ping']:GetValue()
                             local color = Color3.fromRGB(0, 255, 0)
                             if ping > 150 then color = Color3.fromRGB(255, 165, 0)
                             elseif ping > 300 then color = Color3.fromRGB(255, 0, 0) end
